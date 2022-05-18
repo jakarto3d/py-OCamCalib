@@ -13,9 +13,9 @@ The key features are:
 
 * **Easy to use**: It's easy to use for the final users. Two lines in the terminal.
 * **Chessboard corners detection**: Automatic chessboard corners detection and optional manual correction to prevent miss detection.
-* **Calibration parameters**: Calibration parameters are saved in,json file to better portability.
+* **Calibration parameters**: Calibration parameters are saved in .json file to better portability.
 * **Camera model**: Once calibration is done, the camera class is ready to use. Load the calibration file and use all the predefined mapping 
- functions ( world to pixel, pixel to world, undistorted, equirectangular projection, ...) in your project.
+ functions (world to pixel, pixel to world, undistorted, equirectangular projection, ...) in your project.
 
 ## installation
 
@@ -25,7 +25,7 @@ cd py-OCamCalib
 
 # for conda user 
 conda env create --file environment.yml
-conda activate RoadSignsDetection
+conda activate py-OCamCalib
 
 # for virtualenv user 
 python3 -m venv env
