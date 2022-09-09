@@ -108,11 +108,11 @@ def check_detection(corners, image):
     Allows to check corners that were detected automatically and to modify some of them if necessary.
     You can enter in two different mode : SELECTION MODE and DRAW MODE.
     SELECTION MODE: Press 's' to enter the mode. Selection mode allows you to select points that have not been detected
-    accurately. After pressing 's' you can surround such point with bounding boxe by pressing left mouse AND confirm
-    by pressing enter. Once you select all your points, you can quit selection mode by pressing 'esc'. Selected points
-    should appear RED.
-    DRAW MODE: Press 'd' each time you want draw the new point. New point have to be drawn in same order then selected
-    points.
+    accurately. After pressing 's' you can surround such point with bounding boxe by pressing left mouse, drawing
+    bounding boxes AND confirm by pressing enter. Once you select all your points, you have to quit selection mode by
+    pressing 'esc'. Selected points should appear RED.
+    DRAW MODE: Press 'd' each time you want draw the new point and click to drop off your modified points. New point
+    have to be drawn in same order then selected points.
 
     When work is done, press 'z' to quit. A windows with your modified pattern should appears.
     :param corners:

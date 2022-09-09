@@ -19,7 +19,7 @@
 
 from typing import Tuple, List
 import numpy as np
-from py_ocamcalib.camera import Camera
+from modelling.camera import Camera
 
 
 def check_origin(R: np.array, T: np.array) -> np.array:

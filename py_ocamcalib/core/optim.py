@@ -21,7 +21,7 @@
 from typing import Union, List
 import numpy as np
 from scipy.optimize import least_squares
-from py_ocamcalib.camera import Camera
+from modelling.camera import Camera
 
 
 def pack(extrinsics_t_init, distortion_center_init, taylor_coefficient_init):

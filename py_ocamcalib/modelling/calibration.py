@@ -24,14 +24,15 @@ from pathlib import Path
 from typing import Tuple
 import cv2 as cv
 import numpy as np
-from datetime import datetime, date
+from datetime import datetime
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+from loguru import logger
 
-from py_ocamcalib.core._utils import get_reprojection_error_all, get_reprojection_error
-from py_ocamcalib.core.linear_estimation import get_first_linear_estimate, get_taylor_linear
-from py_ocamcalib.core.optim import bundle_adjustement
-from py_ocamcalib.utils import get_files, generate_checkerboard_points, check_detection, transform, save_calib, \
+from core._utils import get_reprojection_error_all, get_reprojection_error
+from core.linear_estimation import get_first_linear_estimate, get_taylor_linear
+from core.optim import bundle_adjustement
+from modelling.utils import get_files, generate_checkerboard_points, check_detection, transform, save_calib, \
     get_canonical_projection_model, Loader, get_incident_angle
 
 
@@ -71,7 +72,7 @@ class CalibrationEngine:
         count = 0
         world_points = generate_checkerboard_points(self.chessboard_size, self.square_size, z_axis=True)
 
-        print(f"INFO:: Start corners extraction ...")
+        logger.info("Start corners extraction")
 
         for img_f in tqdm(sorted(images_path)):
             img = cv.imread(str(img_f))
@@ -109,20 +110,21 @@ class CalibrationEngine:
                                                    "world_points": np.squeeze(world_points)}
                     break
 
-        print(f"INFO:: Extracted chessboard corners with success = {count}/{len(images_path)}")
+        logger.info(f"Extracted chessboard corners with success = {count}/{len(images_path)}")
 
     def save_detection(self):
         now = datetime.now()
         dt_string = now.strftime("%d%m%Y_%H%M%S")
-        with open(f'./py_ocamcalib/checkpoints/corners_detection/detections_{self.cam_name}_{dt_string}.pickle',
+        with open(f'./../checkpoints/corners_detection/detections_{self.cam_name}_{dt_string}.pickle',
                   'wb') as f:
             pickle.dump(self.detections, f)
-            print(f"INFO:: Detection file saved with success.")
+
+            logger.info(f"Detection file saved with success.")
 
     def load_detection(self, file_path: str):
         with open(file_path, 'rb') as f:
             self.detections = pickle.load(f)
-            print(f"INFO:: Detection file loaded with success.")
+            logger.info("Detection file loaded with success.")
 
     def estimate_fisheye_parameters(self, grid_size: int = 5):
         if not self.detections:
@@ -140,10 +142,10 @@ class CalibrationEngine:
                                                        extrinsics_t, taylor_coefficient,
                                                        d_center)
 
-        print(f"INFO:: Linear estimation end with success \n"
-              f"Linear RMS = {rms_overall:0.2f} \n"
-              f"Distortion Center = {d_center}\n"
-              f"Taylor_coefficient = {taylor_coefficient}\n")
+        logger.info(f"Linear estimation end with success \n"
+                    f"Linear RMS = {rms_overall:0.2f} \n"
+                    f"Distortion Center = {d_center}\n"
+                    f"Taylor_coefficient = {taylor_coefficient}\n")
 
         self.distortion_center_linear = d_center
         self.taylor_coefficient_linear = taylor_coefficient
@@ -167,18 +169,19 @@ class CalibrationEngine:
                                                                               self.taylor_coefficient,
                                                                               self.distortion_center,
                                                                               self.stretch_matrix)
-        print(f"INFO:: Bundle Adjustment end with success \n"
-              f"Optimize rms = {rms_overall:0.2f} \n"
-              f"Distortion Center = {d_center_opt}\n"
-              f"Taylor_coefficient = {taylor_coefficient_opt}\n")
+
+        logger.info(f"Bundle Adjustment end with success \n"
+                    f"Optimize rms = {rms_overall:0.2f} \n"
+                    f"Distortion Center = {d_center_opt}\n"
+                    f"Taylor_coefficient = {taylor_coefficient_opt}\n")
 
         self.rms_overall = rms_overall
         self.rms_mean_list = rms_mean_list
         self.rms_std_list = rms_std_list
 
-        save_calib(valid_pattern, extrinsics_t_opt, self.images_path,
-                   self.taylor_coefficient, self.distortion_center,
-                   self.stretch_matrix, self.cam_name, rms_overall, rms_mean_list, rms_std_list)
+        # save_calib(valid_pattern, extrinsics_t_opt, self.images_path,
+        #            self.taylor_coefficient, self.distortion_center,
+        #            self.stretch_matrix, self.cam_name, rms_overall, rms_mean_list, rms_std_list)
 
     def get_chessboard_position(self, save: bool = False):
         """
@@ -205,7 +208,7 @@ class CalibrationEngine:
             world_points_c.append(transform(r, world_points).tolist())
 
         if save:
-            with open('./py_ocamcalib/checkpoints/chessboard_position.json', 'w') as f:
+            with open('./../checkpoints/chessboard_position.json', 'w') as f:
                 json.dump(world_points_c, f, indent=4)
 
         return world_points_c
@@ -221,7 +224,7 @@ class CalibrationEngine:
         plt.title(f'Mean Reprojection Error per Image {self.cam_name}', fontsize=20)
         plt.legend()
         if save:
-            plt.savefig(f"./docs/Mean_reprojection_error_{self.cam_name}.png", dpi=300)
+            plt.savefig(f"./../../docs/Mean_reprojection_error_{self.cam_name}.png", dpi=300)
         plt.show()
 
     def show_reprojection(self):
@@ -313,7 +316,7 @@ class CalibrationEngine:
         plt.title(f"Projection model of {self.cam_name}", fontsize=20)
         plt.ylim([0, 1])
         plt.legend()
-        plt.savefig(f"./docs/Model_projection_{self.cam_name}.png", dpi=300)
+        plt.savefig(f"./../../docs/Model_projection_{self.cam_name}.png", dpi=300)
         plt.show()
 
         return r_calibrated, theta
@@ -339,7 +342,7 @@ class CalibrationEngine:
                    "rms_std_list": self.rms_std_list
                    }
 
-        with open(f'./py_ocamcalib/checkpoints/calibration/calibration_{self.cam_name}_{dt_string}.json', 'w') as f:
+        with open(f'./../checkpoints/calibration/calibration_{self.cam_name}_{dt_string}.json', 'w') as f:
             json.dump(outputs, f, indent=4)
 
     def find_poly_inv(self):
@@ -350,7 +353,7 @@ class CalibrationEngine:
         if self.taylor_coefficient is None or self.distortion_center is None:
             raise ValueError("Fisheye parameters are empty. You first need to specify or load camera's parameters.")
 
-        print("INFO:: Start searching approximation of the inverse function...")
+        logger.info("Start searching approximation of the inverse function...")
         w, h = self.sensor_size
         u = np.arange(0, w, 20).astype(np.float)
         v = np.arange(0, h, 20).astype(np.float)
@@ -379,8 +382,8 @@ class CalibrationEngine:
             max_error = np.max(np.abs(rho - rho_inv))
             deg += 1
 
-        print("INFO:: Poly fit end with success.")
-        print(f"Reprojection Error : {max_error:0.4f}")
-        print(f"Reprojection polynomial degree: {deg}")
-        print("Inverse coefficients : ", inv_coefficient)
+        logger.info("Poly fit end with success.")
+        logger.info(f"Reprojection Error : {max_error:0.4f}")
+        logger.info(f"Reprojection polynomial degree: {deg}")
+        logger.info(f"Inverse coefficients : {inv_coefficient}")
         self.inverse_poly = inv_coefficient
