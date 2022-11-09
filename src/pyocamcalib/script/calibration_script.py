@@ -1,4 +1,4 @@
-from modelling.calibration import CalibrationEngine
+from pyocamcalib.modelling.calibration import CalibrationEngine
 import typer
 
 

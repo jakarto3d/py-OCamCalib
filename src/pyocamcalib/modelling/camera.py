@@ -20,7 +20,7 @@
 import json
 from typing import Tuple, List, Union
 import numpy as np
-from modelling.utils import transform
+from pyocamcalib.modelling.utils import transform
 
 
 def equirectangular2geographic(x, y):

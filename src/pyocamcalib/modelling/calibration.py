@@ -29,10 +29,10 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from loguru import logger
 
-from core._utils import get_reprojection_error_all, get_reprojection_error
-from core.linear_estimation import get_first_linear_estimate, get_taylor_linear
-from core.optim import bundle_adjustement
-from modelling.utils import get_files, generate_checkerboard_points, check_detection, transform, save_calib, \
+from pyocamcalib.core._utils import get_reprojection_error_all, get_reprojection_error
+from pyocamcalib.core.linear_estimation import get_first_linear_estimate, get_taylor_linear
+from pyocamcalib.core.optim import bundle_adjustement
+from pyocamcalib.modelling.utils import get_files, generate_checkerboard_points, check_detection, transform, save_calib, \
     get_canonical_projection_model, Loader, get_incident_angle
 
 
@@ -224,7 +224,7 @@ class CalibrationEngine:
         plt.title(f'Mean Reprojection Error per Image {self.cam_name}', fontsize=20)
         plt.legend()
         if save:
-            plt.savefig(f"./../../docs/Mean_reprojection_error_{self.cam_name}.png", dpi=300)
+            plt.savefig(f"./../../../docs/Mean_reprojection_error_{self.cam_name}.png", dpi=300)
         plt.show()
 
     def show_reprojection(self):
@@ -316,7 +316,7 @@ class CalibrationEngine:
         plt.title(f"Projection model of {self.cam_name}", fontsize=20)
         plt.ylim([0, 1])
         plt.legend()
-        plt.savefig(f"./../../docs/Model_projection_{self.cam_name}.png", dpi=300)
+        plt.savefig(f"./../../../docs/Model_projection_{self.cam_name}.png", dpi=300)
         plt.show()
 
         return r_calibrated, theta

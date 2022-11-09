@@ -1,9 +1,9 @@
 
 from typing import Tuple, List
 import numpy as np
-from core.extrinsic import partial_extrinsics, get_full_rotation_matrix
-from core.intrinsec import intrinsic_linear_estimate
-from core._utils import check_origin, get_reprojection_error
+from pyocamcalib.core.extrinsic import partial_extrinsics, get_full_rotation_matrix
+from pyocamcalib.core.intrinsec import intrinsic_linear_estimate
+from pyocamcalib.core._utils import check_origin, get_reprojection_error
 
 
 def independente_calibration(data: dict, distortion_center: Tuple[float, float] = None):

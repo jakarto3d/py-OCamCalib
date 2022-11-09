@@ -19,7 +19,7 @@
 
 from typing import Tuple
 import numpy as np
-from py_ocamcalib.core.linear_estimation import independente_calibration
+from pyocamcalib.core.linear_estimation import independente_calibration
 
 
 def find_center(data: dict, img_size: Tuple[int, int], grid_size: int, initial_ssre: float):
