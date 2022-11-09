@@ -218,8 +218,89 @@ class Camera:
 
         return image_points
 
-    def undistort(self):
-        pass
+    def cam2perspective_direct(self,
+                               fisheye_image: np.array,
+                               fov: float,
+                               sensor_size: Tuple[int, int]):
+        """
+        Undistort unwrap part of the fisheye image onto a plane perpendicular to the camera axis, i.e. as if it was
+        seen by a perspective camera.
+
+        There are two kinds of mapping models : direct mapping and inverse mapping.
+        Here is an implementation of the direct mapping.
+
+        Specifically, for direct mapping, each image pixel from the fisheye image is projected onto the
+        perspective image. Obviously, this will result in empty points in the perspective image. The purpose of direct
+        mapping is mostly educational.
+
+        :param fisheye_image: input image as array
+        :param fov: field of view the desired perspective camera in degree (between 0 and 180).
+        :param sensor_size: (height, width) in pixels. Determine the output image resolution.
+        :return: np.array
+        """
+        if (fov < 0) or (fov > 180):
+            raise ValueError("Field of view of perspective camera have to be between 0 and 180")
+
+        perspective_im = np.zeros((*sensor_size, 3)).astype(np.uint8)
+        fisheye_height, fisheye_width = fisheye_image.shape[:2]
+        u_points_fisheye, v_points_fisheye = np.meshgrid(np.arange(fisheye_height), np.arange(fisheye_width))
+        vu_points_fisheye = np.vstack((v_points_fisheye.flatten(), u_points_fisheye.flatten())).T
+        world_orientation_vector = self.cam2world(vu_points_fisheye.astype(float))
+        f = np.max(sensor_size) / (2 * np.tan(np.deg2rad(fov / 2)))
+
+        perspective_matrix = np.array([[f, 0, sensor_size[0] / 2],
+                                       [0, f, sensor_size[1] / 2],
+                                       [0., 0, 1]])
+
+        vu_points_perspective = world_orientation_vector @ perspective_matrix.T
+        vu_points_perspective = np.round(
+            vu_points_perspective[:, :2] / np.abs(vu_points_perspective[:, 2]).reshape((-1, 1))).astype(int)
+        mask_1 = (vu_points_perspective[:, 0] >= 0) & (vu_points_perspective[:, 0] < sensor_size[1])
+        mask_2 = (vu_points_perspective[:, 1] >= 0) & (vu_points_perspective[:, 1] < sensor_size[0])
+        mask = mask_1 & mask_2
+        perspective_im[vu_points_perspective[mask][:, 1], vu_points_perspective[mask][:, 0]] = fisheye_image[
+            vu_points_fisheye[mask][:, 1], vu_points_fisheye[mask][:, 0]]
+
+        return perspective_im
+
+    def cam2perspective_indirect(self,
+                                 fisheye_image: np.array,
+                                 fov: float,
+                                 sensor_size: Tuple[int, int]):
+        """
+        Undistort unwrap part of the fisheye image onto a plane perpendicular to the camera axis, i.e. as if it was
+        seen by a perspective camera.
+
+        There are two kinds of mapping models : direct mapping and inverse mapping.
+
+        Here is an implementation of the INDIRECT mapping.
+
+        Inverse mapping take pixel coordinates from the desired perspective image output, generates the corresponding
+        three-dimensional point coordinates, and finally project it onto the fisheye image. It allows to not get empty
+        space in the output image. This is the mapping generally adopted.
+
+        :param fisheye_image: input image as array
+        :param fov: field of view the desired perspective camera in degree (between 0 and 180).
+        :param sensor_size: (height, width) in pixels. Determine the output image resolution.
+        :return: np.array
+        """
+        perspective_im = np.zeros((*sensor_size, 3)).astype(np.uint8)
+        u_points_undistort, v_points_undistort = np.meshgrid(np.arange(sensor_size[0]), np.arange(sensor_size[1]))
+        nb_points = v_points_undistort.flatten().shape[0]
+        uv_points_undistort = np.vstack((u_points_undistort.flatten(), v_points_undistort.flatten())).T
+        f = np.max(sensor_size) / (2 * np.tan(np.deg2rad(fov / 2)))
+        X = (uv_points_undistort[:, 1] - sensor_size[1] / 2)
+        Y = (uv_points_undistort[:, 0] - sensor_size[0] / 2)
+        Z = [f] * nb_points
+        world_points = np.vstack((X, Y, Z)).T
+        vu_fisheye_points = np.round(self.world2cam_fast(world_points)).astype(int)
+        mask_1 = (vu_fisheye_points[:, 0] >= 0) & (vu_fisheye_points[:, 0] < fisheye_image.shape[1])
+        mask_2 = (vu_fisheye_points[:, 1] >= 0) & (vu_fisheye_points[:, 1] < fisheye_image.shape[0])
+        mask = mask_1 & mask_2
+        perspective_im[uv_points_undistort[mask][:, 0], uv_points_undistort[mask][:, 1]] = fisheye_image[
+            vu_fisheye_points[mask][:, 1], vu_fisheye_points[mask][:, 0]]
+
+        return perspective_im
 
     def load_parameters(self, parameters_path: str):
         """
