@@ -230,7 +230,7 @@ class Camera:
         with open(parameters_path, 'r') as f:
             calib = json.load(f)
 
-        self.distortion_center = np.array(calib["distortion_center"][::-1])
+        self.distortion_center = np.array(calib["distortion_center"])
         self.stretch_matrix = np.array(calib["stretch_matrix"])
         self.taylor_coefficient = np.array(calib["taylor_coefficient"])
         self.inverse_poly = np.array(calib["inverse_poly"])
