@@ -345,43 +345,47 @@ class CalibrationEngine:
         with open(f'./../checkpoints/calibration/calibration_{self.cam_name}_{dt_string}.json', 'w') as f:
             json.dump(outputs, f, indent=4)
 
-    def find_poly_inv(self):
+    def find_poly_inv(self,
+                      nb_sample: int = 100,
+                      sample_ratio: float = 0.9,
+                      max_degree_inverse_poly: int = 25
+                      ):
         """
-        Find an approximation of the inverse function. New function is much faster !
-        :return:
-        """
+              Find an approximation of the inverse function. New function is much faster !
+              :return:
+              """
         if self.taylor_coefficient is None or self.distortion_center is None:
             raise ValueError("Fisheye parameters are empty. You first need to specify or load camera's parameters.")
 
+        if sample_ratio < 0 or sample_ratio > 1:
+            raise ValueError(f"sample_ratio have to be between 0 and 1. sample_ratio={sample_ratio} is not allow.")
+
         logger.info("Start searching approximation of the inverse function...")
-        w, h = self.sensor_size
-        u = np.arange(0, w, 20).astype(np.float)
-        v = np.arange(0, h, 20).astype(np.float)
-        u, v = np.meshgrid(u, v)
-        uv_points = np.vstack((u.flatten(), v.flatten())).T
 
-        # First transform the sensor pixel point to the ideal image pixel point ().
-        uv_points -= self.distortion_center
-        stretch_inv = np.linalg.inv(self.stretch_matrix)
-        uv_points = uv_points @ stretch_inv.T
+        theta = np.linspace(0, np.pi * sample_ratio, nb_sample)
+        rho = []
+        for i in range(nb_sample):
+            taylor_tmp = self.taylor_coefficient[::-1].copy()
+            taylor_tmp[-2] -= np.tan(np.pi / 2 - theta[i])
+            roots = np.roots(taylor_tmp)
+            roots = roots[(roots > 0) & (np.imag(roots) == 0)]
+            roots = np.array([float(np.real(e)) for e in roots])
+            if roots.shape[0] == 0:
+                rho.append(np.nan)
+            else:
+                rho.append(np.min(roots))
 
-        rho = np.sqrt(uv_points[:, 0] ** 2 + uv_points[:, 1] ** 2)
-        x = uv_points[:, 0]
-        y = uv_points[:, 1]
-        z = np.polyval(self.taylor_coefficient[::-1], rho)
-        world_points = np.vstack((x, y, z)).T
-        theta = get_incident_angle(world_points)
-
+        rho = np.array(rho)
         max_error = float("inf")
         deg = 1
 
         # Repeat until the reprojection error is smaller than 0.01 pixels
-        while max_error > 0.01:
+        while (max_error > 0.01) & (deg < max_degree_inverse_poly):
             inv_coefficient = np.polyfit(theta, rho, deg)
             rho_inv = np.polyval(inv_coefficient, theta)
             max_error = np.max(np.abs(rho - rho_inv))
             deg += 1
-
+        import matplotlib.pyplot as plt
         logger.info("Poly fit end with success.")
         logger.info(f"Reprojection Error : {max_error:0.4f}")
         logger.info(f"Reprojection polynomial degree: {deg}")
