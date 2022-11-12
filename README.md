@@ -93,12 +93,12 @@ However, it's unlikely that the camera you wish to calibrate fit exactly with th
 complex series of lenses that can't fit accurately to a mathematical model du to physical manufacturing. 
 Hence, Scaramuzza's model propose to fit a polynomial to find the accurate function $f(\rho) = \theta$.
 <p>
-  <img src="./docs/canonical_fisheye_projection.png" width=500" class="center">
+  <img src="./docs/canonical_fisheye_projection.png" width=700" class="center">
 </p>
 
 The following equation maps an image point into its corresponding 3-D vector.
 <p>
-  <img src="./docs/image_to_3d_vector.png" width=500" class="center">
+  <img src="./docs/image_to_3d_vector.png" width=600" class="center">
 </p>
 
 
@@ -107,7 +107,7 @@ The direct polynomial is used to map a point from the image plane into its corre
 need to the inverse projection to map a 3-D vector in the camera's coordinate into it's corresponding point in the image
 plane. On way is to find is to find the solution of the following system of equations :  
 <p>
-  <img src="./docs/cam2world_system.png" width=300" class="center">
+  <img src="./docs/cam2world_system.png" width=500" class="center">
 </p>
 One need to find the roots of (1), take the minimum of the real one, inject in $\lamda$ and get the couple $(u, v)$.
 One other way, which is much faster, is to fit a polynomial function (which is the so-called inverse polynomial) using 
@@ -120,11 +120,11 @@ conditioned warning but almost, $0.9\pi$ give accurate results). Even if the cam
 inverse polynomial should stay consistent (which mean rho have to always increase with theta) for the entire field of view.
 Here is an example of strange behavior for $\theta$ sampled between $[0, 0.6\pi]$:
 <p>
-  <img src="./docs/inverse_poly_bad_fitting.png" width=300" class="center">
+  <img src="./docs/inverse_poly_bad_fitting.png" width=600" class="center">
 </p>
 Here is the same for $\theta$ sampled between $[0, 0.9\pi]$, now result is consistent:
 <p>
-  <img src="./docs/inverse_poly_good_fitting.png" width=300" class="center">
+  <img src="./docs/inverse_poly_good_fitting.png" width=600" class="center">
 </p>
 
 
