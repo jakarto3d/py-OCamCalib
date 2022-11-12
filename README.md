@@ -66,3 +66,65 @@ Once the opencv windows is opened, you can enter in two different mode : SELECTI
 ```commandline
 python calibration_script.py ./../../test_images/fish_1 8 6  --camera-name fisheye_1 --corners-path ./../checkpoints/corners_detection/detections_fisheye_1_09092022_053310.pickle
 ```
+
+## Some Note about the implementation and the camera model (WIP)
+
+## Fisheye camera model
+The Computer Vision Toolbox calibration algorithm uses the fisheye camera model proposed by Scaramuzza. 
+The model uses an omnidirectional camera model. The process treats the imaging system as a compact system. 
+In order to relate a 3-D world point on to a 2-D image, you must obtain the camera extrinsic and intrinsic parameters. 
+World points are transformed to camera coordinates using the extrinsics parameters. 
+The camera coordinates are mapped into the image plane using the intrinsics parameters.
+
+### Extrinsics parameters
+The extrinsic parameters consist of a rotation, R, and a translation, t. The origin of the camera's coordinate system
+is at its optical center (the point of intersection of the lens' optical axis with the camera's sensing plane) and 
+its x- and y-axis define the image plane. 
+<p float="left">
+  <img src="./docs/extrinsics_formula.png" width="300" />
+  <img src="./docs/extrinsics_schema.png" width="231" />
+</p>
+
+### Intrinsics parameters
+Intrinsics parameters allow to map world point [Xc, Yc, Zc] from the camera's coordinate system to the image plane in
+pixel coordinates.  
+There are several canonical fisheye projections to model this projection (stereographic, equidistant, equisolid, ...).
+However, it's unlikely that the camera you wish to calibrate fit exactly with these projections. These cameras use a 
+complex series of lenses that can't fit accurately to a mathematical model du to physical manufacturing. 
+Hence, Scaramuzza's model propose to fit a polynomial to find the accurate function $f(\rho) = \theta$.
+<p>
+  <img src="./docs/canonical_fisheye_projection.png" width=500" class="center">
+</p>
+
+The following equation maps an image point into its corresponding 3-D vector.
+<p>
+  <img src="./docs/image_to_3d_vector.png" width=500" class="center">
+</p>
+
+
+### The inverse polynomial function
+The direct polynomial is used to map a point from the image plane into its corresponding 3-D vector. However, you might 
+need to the inverse projection to map a 3-D vector in the camera's coordinate into it's corresponding point in the image
+plane. On way is to find is to find the solution of the following system of equations :  
+<p>
+  <img src="./docs/cam2world_system.png" width=300" class="center">
+</p>
+One need to find the roots of (1), take the minimum of the real one, inject in $\lamda$ and get the couple $(u, v)$.
+One other way, which is much faster, is to fit a polynomial function (which is the so-called inverse polynomial) using 
+some samples from the previous method. This mean to get ${(\rho_i, \theta_i)}_{i \in [1, N]}$ using previous method and f
+it a polynom $P$ such that $\forall i \in [1, N], P(\theta_i) = \rho_i $. The degree of $P$ is determined in the following 
+way: fix the maximal error $\alpha$ desired and while $|P(\theta_i) - \rho_i| > \alpha$ increase the degree of $P$.
+The number of sample $N$ is not so important, $N\approx=100$ give accurate results. However, one should take care to sample 
+the incident angle $\theta$ uniformly in $[0, \pi]$ (not until $\pi$ because fitting function may raise poorly 
+conditioned warning but almost, $0.9\pi$ give accurate results). Even if the camera cannot have a field of view of 360 degrees,
+inverse polynomial should stay consistent (which mean rho have to always increase with theta) for the entire field of view.
+Here is an example of strange behavior for $\theta$ sampled between $[0, 0.6\pi]$:
+<p>
+  <img src="./docs/inverse_poly_bad_fitting.png" width=300" class="center">
+</p>
+Here is the same for $\theta$ sampled between $[0, 0.9\pi]$, now result is consistent:
+<p>
+  <img src="./docs/inverse_poly_good_fitting.png" width=300" class="center">
+</p>
+
+
