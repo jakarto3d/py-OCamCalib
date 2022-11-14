@@ -201,11 +201,15 @@ class Camera:
 
         theta = get_incident_angle(world_points)
         rho = np.polyval(self.inverse_poly, theta)
-        world_radius = np.sqrt(world_points[:, 0] ** 2 + world_points[:, 1] ** 2)
+        perspective_radius = np.sqrt(world_points[:, 0] ** 2 + world_points[:, 1] ** 2)
+
+        # Avoid division by zero for scene points which are along the z-axis
+        ind = np.where(perspective_radius == 0)[0]
+        perspective_radius[ind] = np.finfo(float).eps
 
         # Get 2D points in image plane
-        image_points_x = (world_points[:, 0] / world_radius) * rho
-        image_points_y = (world_points[:, 1] / world_radius) * rho
+        image_points_x = (world_points[:, 0] / perspective_radius) * rho
+        image_points_y = (world_points[:, 1] / perspective_radius) * rho
 
         # Get 2D points in image sensor
         image_points_x = image_points_x * self.stretch_matrix[0, 0] + image_points_y * self.stretch_matrix[0, 1]
