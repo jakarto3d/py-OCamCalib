@@ -124,7 +124,7 @@ One need to find the roots of (1), take the minimum of the real one, inject in $
 One other way, which is much faster, is to fit a polynomial function (which is the so-called inverse polynomial) using 
 some samples from the previous method. This mean to get ${(\rho_i, \theta_i)}_{i \in [1, N]}$ using previous method and 
 fit a polynom $P$ such that $\forall i \in [1, N], P(\theta_i) = \rho_i $. The degree of $P$ is determined in the following 
-way: fix the maximal error $\alpha$ desired and  increase the degree of $P$ until $ \sum \frac{|P(\theta_i) - \rho_i|}{N} < \alpha$.<br/>
+way: fix the maximal error $\alpha$ desired and  increase the degree of $P$ until $\sum \frac{|P(\theta_i) - \rho_i|}{N} < \alpha$. <br/>
 The number of sample $N$ is not so important, $N\approx100$ give accurate results. However, one should take care to sample 
 the incident angle $\theta$ uniformly in $[0, \pi]$ (not until $\pi$ because fitting function may raise poorly 
 conditioned warning but almost, $0.9\pi$ give accurate results). Even if the camera cannot have a field of view of 360 degrees,
@@ -144,11 +144,11 @@ This section describe the process where the initial fisheye image is projection-
 process is often referred as "image distortion correction" but it poorly makes sens and can be really confusing. The perpective 
 (aka rectilinear) projection is generally considered to be the Reference, and so the convention is to talk about "unwanted distortion"
 and "correction" each time projection differ from this ideal (i.e. a straight line must be straight).  <br/>
-However, if you take a fisheye camera that perfectly follow an ideal equidistant projection, why should we need to talk about
+However, if you take a fisheye camera that perfectly follow an ideal equidistant projection, why should we talk about
 "distortion" or "correction" ? Maybe, we should talk about distortion if use equidistant projection to model our camera but 
 it doesn't fit exactly with our camera, so we may want to correct or distort our equidistant model to fit exactly with the camera.
 And then, for a project, we may need to CONVERT image from this camera to Rectilinear image. <br/>
-That why I prefer to talk about Image projection CONVERSION than "undistortion" to refer to the process of fisheye-rectilinear transformation.<br/>
+That why I prefer to talk about Image projection CONVERSION than "UNDISTORTION" to refer to the process of fisheye-rectilinear transformation.<br/>
 <a href="http://michel.thoby.free.fr/Fisheye_history_short/Projections/Fisheye_projection-models.html">Here is an interesting article on the subject.
 
 <p float="left">
