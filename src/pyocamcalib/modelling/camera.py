@@ -358,3 +358,29 @@ class Camera:
         equirectangular_img[ye[mask], xe[mask]] = fisheye_image[uv_points[:, 1][mask], uv_points[:, 0][mask]]
 
         return equirectangular_img
+
+    def equirectangular2cam(self, equirectangular_im: np.array, rotation_matrix: np.array, fisheye_size: Tuple[int, int]):
+        he, we, n_band = equirectangular_im.shape
+
+        # Create fisheye image
+        hf, wf = fisheye_size
+        fisheye_img = np.zeros((hf, wf, n_band)).astype(np.uint8)
+        grid = np.indices((hf, wf))
+        uv_points = np.vstack((grid[1].flatten(), grid[0].flatten())).T
+
+        xyz = self.cam2world(uv_points.astype(float))
+        xyz_rotated = xyz @ rotation_matrix.T
+        longitude, latitude = cartesian2geographic(xyz_rotated)
+        x = longitude / np.pi
+        y = latitude / (np.pi / 2)
+        ve = we * (x + 1) / 2
+        ue = he * (1 - y) / 2
+        uv_points_e = np.vstack((ue, ve)).T
+        uv_points_e = np.round(uv_points_e).astype(int)
+        cond_1 = (uv_points_e[:, 0] < he) & (uv_points_e[:, 0] > 0)
+        cond_2 = (uv_points_e[:, 1] < we) & (uv_points_e[:, 1] > 0)
+        mask = cond_1 & cond_2
+        fisheye_img[uv_points[:, 1][mask], uv_points[:, 0][mask]] = equirectangular_im[uv_points_e[:, 0][mask],
+                                                                                       uv_points_e[:, 1][mask]]
+
+        return fisheye_img

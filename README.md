@@ -140,13 +140,13 @@ Here is the same for $\theta$ sampled between $[0, 0.9\pi]$, now result is consi
 
 ### Image projection conversion
 
-This section describe the process where the initial fisheye image is projection-transformed into a Rectilinear image. This
-process is often referred as "image distortion correction" but it poorly makes sens and can be really confusing. The perpective 
+This section describe the process where the initial fisheye image is projection-transformed into a Rectilinear image. <br/>
+This process is often referred as "image distortion correction" but this appellation poorly makes sense and can be really confusing. In the literature, perpective 
 (aka rectilinear) projection is generally considered to be the Reference, and so the convention is to talk about "unwanted distortion"
 and "correction" each time projection differ from this ideal (i.e. a straight line must be straight).  <br/>
 However, if you take a fisheye camera that perfectly follow an ideal equidistant projection, why should we talk about
-"distortion" or "correction" ? Maybe, we should talk about distortion if use equidistant projection to model our camera but 
-it doesn't fit exactly with our camera, so we may want to correct or distort our equidistant model to fit exactly with the camera.
+"distortion" or "correction" ? In this case, we should talk about distortion the equidistant projection model that we use for our camera doesn't exactly fit with our camera, 
+so we may want to correct or distort our model to fit exactly with it.
 And then, for a project, we may need to CONVERT image from this camera to Rectilinear image. <br/>
 That why I prefer to talk about Image projection CONVERSION than "UNDISTORTION" to refer to the process of fisheye-rectilinear transformation.<br/>
 <a href="http://michel.thoby.free.fr/Fisheye_history_short/Projections/Fisheye_projection-models.html">Here is an interesting article on the subject.
