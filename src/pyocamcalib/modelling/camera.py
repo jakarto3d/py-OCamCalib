@@ -20,6 +20,7 @@
 import json
 from typing import Tuple, List, Union
 import numpy as np
+import cv2 as cv
 from pyocamcalib.modelling.utils import transform
 
 
@@ -359,7 +360,11 @@ class Camera:
 
         return equirectangular_img
 
-    def equirectangular2cam(self, equirectangular_im: np.array, rotation_matrix: np.array, fisheye_size: Tuple[int, int]):
+    def equirectangular2cam(self,
+                            equirectangular_im: np.array,
+                            rotation_matrix: np.array,
+                            fisheye_size: Tuple[int, int],
+                            inpaint: bool = False):
         he, we, n_band = equirectangular_im.shape
 
         # Create fisheye image
@@ -382,5 +387,11 @@ class Camera:
         mask = cond_1 & cond_2
         fisheye_img[uv_points[:, 1][mask], uv_points[:, 0][mask]] = equirectangular_im[uv_points_e[:, 0][mask],
                                                                                        uv_points_e[:, 1][mask]]
+        if inpaint:
+            mask_black_pixel_per_channel = fisheye_img == [0, 0, 0]
+            mask_black_pixel = mask_black_pixel_per_channel[:, :, 0] & mask_black_pixel_per_channel[:, :,
+                                                                       1] & mask_black_pixel_per_channel[:, :, 2]
+            fisheye_img = cv.inpaint(fisheye_img, mask_black_pixel.astype(np.uint8), 3, cv.INPAINT_TELEA)
+
 
         return fisheye_img
