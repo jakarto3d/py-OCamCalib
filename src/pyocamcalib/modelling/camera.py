@@ -320,6 +320,8 @@ class Camera:
         self.stretch_matrix = np.array(calib["stretch_matrix"])
         self.taylor_coefficient = np.array(calib["taylor_coefficient"])
         self.inverse_poly = np.array(calib["inverse_poly"])
+        if 'cam_name' in calib.keys():
+            self.name = calib['cam_name']
 
     def cam2equirectangular(self, fisheye_image: np.array, extrinsic: np.array, equirectangular_size: Tuple[int, int]):
         """
@@ -392,6 +394,5 @@ class Camera:
             mask_black_pixel = mask_black_pixel_per_channel[:, :, 0] & mask_black_pixel_per_channel[:, :,
                                                                        1] & mask_black_pixel_per_channel[:, :, 2]
             fisheye_img = cv.inpaint(fisheye_img, mask_black_pixel.astype(np.uint8), 3, cv.INPAINT_TELEA)
-
 
         return fisheye_img
