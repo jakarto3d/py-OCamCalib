@@ -96,6 +96,55 @@ class Camera:
         self.distortion_center = distortion_center
         self.inverse_poly = inverse_poly
 
+    @classmethod
+    def load_parameters_json(cls, parameters_path: str):
+        """
+        Load calibration parameters from .json file.
+        :param parameters_path: path to .json file.
+        :return:
+        """
+        with open(parameters_path, 'r') as f:
+            calib = json.load(f)
+
+        distortion_center = tuple(calib["distortion_center"])
+        stretch_matrix = np.array(calib["stretch_matrix"])
+        taylor_coefficient = np.array(calib["taylor_coefficient"])
+        inverse_poly = np.array(calib["inverse_poly"])
+
+        try:
+            name = calib['camera_name']
+        except KeyError:
+            name = None
+
+        return cls(distortion_center=distortion_center,
+                   stretch_matrix=stretch_matrix,
+                   taylor_coefficient=taylor_coefficient,
+                   inverse_poly=inverse_poly,
+                   name=name)
+
+    @classmethod
+    def load_parameters_dict(cls, parameters_dict: dict):
+        """
+        Load calibration parameters from .json file.
+        :param parameters_path: path to .json file.
+        :return:
+        """
+
+        distortion_center = tuple(parameters_dict["distortion_center"])
+        stretch_matrix = np.array(parameters_dict["stretch_matrix"])
+        taylor_coefficient = np.array(parameters_dict["taylor_coefficient"])
+        inverse_poly = np.array(parameters_dict["inverse_poly"])
+        try:
+            name = parameters_dict['camera_name']
+        except KeyError:
+            name = None
+
+        return cls(distortion_center=distortion_center,
+                   stretch_matrix=stretch_matrix,
+                   taylor_coefficient=taylor_coefficient,
+                   inverse_poly=inverse_poly,
+                   name=name)
+
     def world2cam(self, world_points: np.array, extrinsics: np.array = None):
 
         """
@@ -306,22 +355,6 @@ class Camera:
             vu_fisheye_points[mask][:, 1], vu_fisheye_points[mask][:, 0]]
 
         return perspective_im
-
-    def load_parameters(self, parameters_path: str):
-        """
-        Load calibration parameters from .json file.
-        :param parameters_path: path to .json file.
-        :return:
-        """
-        with open(parameters_path, 'r') as f:
-            calib = json.load(f)
-
-        self.distortion_center = np.array(calib["distortion_center"])
-        self.stretch_matrix = np.array(calib["stretch_matrix"])
-        self.taylor_coefficient = np.array(calib["taylor_coefficient"])
-        self.inverse_poly = np.array(calib["inverse_poly"])
-        if 'cam_name' in calib.keys():
-            self.name = calib['cam_name']
 
     def cam2equirectangular(self, fisheye_image: np.array, extrinsic: np.array, equirectangular_size: Tuple[int, int]):
         """

@@ -43,7 +43,6 @@ class CalibrationEngine:
                  camera_name: str,
                  square_size: float = 1):
         """
-        :param sensor_size: (width, height) in pixel unit
         :param working_dir: path to folder which contains all chessboard images
         :param chessboard_size: Number of INNER corners per a chessboard (row, column)
         """
