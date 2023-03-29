@@ -322,12 +322,13 @@ class Camera:
                                  fov: float,
                                  sensor_size: Tuple[int, int]):
         """
-        Undistort unwrap part of the fisheye image onto a plane perpendicular to the camera axis, i.e. as if it was
+        Unwrap part of the fisheye image onto a plane perpendicular to the camera axis, i.e. as if it was
         seen by a perspective camera.
 
         There are two kinds of mapping models : direct mapping and inverse mapping.
 
         Here is an implementation of the INDIRECT mapping.
+
 
         Inverse mapping take pixel coordinates from the desired perspective image output, generates the corresponding
         three-dimensional point coordinates, and finally project it onto the fisheye image. It allows to not get empty
