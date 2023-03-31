@@ -133,6 +133,7 @@ Here is an example of strange behavior for $\theta$ sampled between $[0, 0.6\pi]
 <p>
   <img src="./docs/inverse_poly_bad_fitting.png" width=600" class="center">
 </p>
+
 Here is the same for $\theta$ sampled between $[0, 0.9\pi]$, now result is consistent:
 <p>
   <img src="./docs/inverse_poly_good_fitting.png" width=600" class="center">
