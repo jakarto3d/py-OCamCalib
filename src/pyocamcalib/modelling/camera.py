@@ -430,3 +430,14 @@ class Camera:
             fisheye_img = cv.inpaint(fisheye_img, mask_black_pixel.astype(np.uint8), 3, cv.INPAINT_TELEA)
 
         return fisheye_img
+
+    def __repr__(self):
+        attributes = [
+            f"name: '{self.name}'",
+            f"taylor_coefficient: {self.taylor_coefficient}",
+            f"stretch_matrix: {self.stretch_matrix}",
+            f"distortion_center: {self.distortion_center}",
+            f"inverse_poly: '{self.inverse_poly}'",
+        ]
+
+        return "Camera(\n " + ",\n ".join(attributes) + "\n)"
