@@ -21,8 +21,7 @@ def main(fisheye_image_path: str,
     """
 
     fisheye_image = cv.imread(fisheye_image_path)
-    my_camera = Camera()
-    my_camera.load_parameters_json(calibration_file_path)
+    my_camera = Camera.load_parameters_json(calibration_file_path)
     perspective_image = my_camera.cam2perspective_indirect(fisheye_image,
                                                            perspective_fov,
                                                            perspective_sensor_size)
