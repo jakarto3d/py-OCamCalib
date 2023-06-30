@@ -29,7 +29,7 @@ def main(fisheye_image_path: str,
     plt.imshow(fisheye_image[:, :, ::-1])
     plt.title('Original fisheye image')
     plt.figure()
-    plt.imshow(perspective_image)
+    plt.imshow(perspective_image[:, :, ::-1])
     plt.title(f'Perspective conversion. fov = {perspective_fov} deg')
     plt.show()
 
