@@ -276,8 +276,8 @@ class CalibrationEngine:
         """
 
         w, h = self.sensor_size
-        u = np.arange(0, w, 20).astype(np.float)
-        v = np.arange(0, h, 20).astype(np.float)
+        u = np.arange(0, w, 20).astype(float)
+        v = np.arange(0, h, 20).astype(float)
         u, v = np.meshgrid(u, v)
         uv_points = np.vstack((u.flatten(), v.flatten())).T
 
