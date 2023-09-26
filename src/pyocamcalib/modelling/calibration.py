@@ -134,6 +134,12 @@ class CalibrationEngine:
         valid_pattern, d_center, min_rms, extrinsics_t, taylor_t = get_first_linear_estimate(self.detections,
                                                                                              self.sensor_size,
                                                                                              grid_size)
+        
+        # the linear estimation can fail, when the images are not good enough
+        if valid_pattern == None or not any(valid_pattern):
+            loader.stop()
+            logger.error("Linear estimation failed of parameters failed. Check the chessboard detection in the supplied calibartion images!")
+            raise ValueError("Linear estimation failed of parameters failed.")
 
         taylor_coefficient, extrinsics_t = get_taylor_linear(self.detections, valid_pattern, extrinsics_t, d_center)
         loader.stop()
