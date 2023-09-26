@@ -73,7 +73,7 @@ class CalibrationEngine:
 
         logger.info("Start corners extraction")
 
-        for img_f in tqdm(sorted(images_path)):
+        for img_f in tqdm(images_path):
             img = cv.imread(str(img_f))
             height, width = img.shape[:2]
             ratio = width / height
