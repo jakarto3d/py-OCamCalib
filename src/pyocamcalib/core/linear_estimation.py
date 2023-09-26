@@ -25,6 +25,8 @@ from pyocamcalib.core._utils import check_origin, get_reprojection_error
 
 
 def independente_calibration(data: dict, distortion_center: Tuple[float, float] = None):
+    # This is used as a threshold for the _standard deviation_ of the reprojection errors.
+    # It seems no calibration is possible, if this is exceeded for every image.
     reprojection_error_threshold = 10.
 
     valid_pattern = []
@@ -111,15 +113,21 @@ def get_first_linear_estimate(data: dict, img_size: Tuple[int, int], grid_size: 
         for x in grid_x:
             for y in grid_y:
                 d_center = (x, y)
+                
+                # when no valid pattern is found, the independent calibration returns empty lists
+                # for extrinsics_t, taylor_coefficient_t and reprojection_error_t
                 valid, extrinsics_t, taylor_coefficient_t, reprojection_error_t = independente_calibration(data,
                                                                                                            distortion_center=d_center)
-                overall_rms = float(np.mean(reprojection_error_t))
-                if overall_rms < min_rms:
-                    best_extrinsics_t = extrinsics_t
-                    best_taylor_t = taylor_coefficient_t
-                    valid_pattern = valid
-                    delta_rms = min_rms - overall_rms
-                    min_rms = overall_rms
-                    best_d_center = d_center
+                
+                # so check if any valid pattern exists before computing the mean
+                if any(valid):
+                    overall_rms = float(np.mean(reprojection_error_t))
+                    if overall_rms < min_rms:
+                        best_extrinsics_t = extrinsics_t
+                        best_taylor_t = taylor_coefficient_t
+                        valid_pattern = valid
+                        delta_rms = min_rms - overall_rms
+                        min_rms = overall_rms
+                        best_d_center = d_center
         counter += 1
     return valid_pattern, best_d_center, min_rms, best_extrinsics_t, best_taylor_t
