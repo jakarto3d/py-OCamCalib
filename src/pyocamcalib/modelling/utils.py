@@ -26,7 +26,7 @@ from threading import Thread
 from time import sleep
 import numpy as np
 
-IMG_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm', '.tif', '.PNG']
+IMG_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm', '.tif', '.tiff', '.PNG']
 
 
 def transform(extrinsics: np.array, world_points: np.array):
@@ -64,7 +64,7 @@ def get_files(path):
     all_files = []
     for ext in IMG_EXTENSIONS:
         all_files.extend(list(path.glob("*" + ext)))
-    return all_files
+    return sorted(all_files)
 
 
 def generate_checkerboard_points(board_size: Tuple[int, int], square_size: float = 1, z_axis: bool = False):
@@ -152,7 +152,7 @@ def check_detection(corners, image):
     write_text(image_draw, text_1)
     for corner in corners:
         cv.drawMarker(image_draw, tuple(corner.astype(int)), (0, 255, 0))
-    cv.namedWindow("image", 2)
+    cv.namedWindow("image", cv.WINDOW_NORMAL)
     cv.imshow('image', image_draw)
     params = [image_draw, mode_draw, mode_select, corners, idx, new_corners, wait]
     cv.setMouseCallback('image', click_event, params)
